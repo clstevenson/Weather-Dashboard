@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="x-ua-compatible" content="ie=edge">
+        <title>Weather Dashboard</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+        <!-- Place favicon.ico in the root directory -->
+
+    </head>
+    <body>
+        <title>
+            <h1>Weather Dashboard</h1>
+        </title>
+
+
+        <!-- user enters the city to search for -->
+        <div>
+            <h2>Search for a City:</h2>
+            <input id="city-input" type="text" placeholder="Enter city" />
+            <button id="search">Search</button>
+        </div>
+
+        <!-- container for previous searches (as buttons) -->
+        <div id="search-history"></div>
+
+        <!-- display results of search -->
+        <div id="results-now">
+            <!-- display current temperature, wind, and RH -->
+        </div>
+
+        <div id="results-five-day">
+            <h2>5-Day Forecast</h2>
+            <!-- use one card for each day, starting tomorrow -->
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+        <script type="text/javascript" src="./assets/js/script.js"></script>
+    </body>
+</html>
