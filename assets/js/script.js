@@ -4,6 +4,9 @@ $(document).ready(function() {
   // Open Weather API key
   const APIkey = 'ee399b08217b77b68c46f7e79d42d432';
 
+  // eventually get this from the text input of the form
+  let city = "Richmond";
+
   // function accepts input and changes DOM with weather forecast
   const getWeather = city => {
     let url = 'http://api.openweathermap.org/geo/1.0/direct?q=' + city + '&limit=1&appid=' + APIkey;
@@ -11,13 +14,71 @@ $(document).ready(function() {
     fetch(url)
       .then(response => response.json())
       .then(json => {
-        let lat = json[0].lat;
-        let lon = json[0].lon;
-        console.log([lat, lon]);
+        // get the coordinates from the first city
+        return {lat: json[0].lat, lon: json[0].lon};
       })
+      .then(coords => {
+        // fetch the weather forecast
+        let weatherURL = 'https://api.openweathermap.org/data/2.5/forecast?lat='+coords.lat+'&lon='+coords.lon+'&appid='+APIkey+'&units=imperial';
+        return fetch(weatherURL);
+      })
+      .then(response => response.json())
+      .then(json => updateDisplay(json))
       .catch(e => console.log(e.message))
   };
 
+  // return an jQuery image object with the desired icon
+  const getIconImage = (icon) => $("<img></img>").attr('src','https://openweathermap.org/img/wn/' + icon + '.png');
+
+  // function to update the display with the 5-day forecast
+  // input is a json object from the Open Weather API fetch
+  // remember that fetches are asynchronous, so this function has to be part of a .then chain
+  const updateDisplay = json => {
+    let numElements = json.list.length, weather = [], dateTime;
+
+    for (let i = 0, j=0; i < numElements; i+=8, j++) {
+      // for now let's get conditions that are 24h apart, adjusted to local time
+      weather[j] = {datetime: dayjs(json.list[i].dt_txt).add(json.city.timezone,'s').format('YYYY-MM-DD HH:MM'),
+                    icon: json.list[i].weather[0].icon,
+                    temp: 'Temp: ' + json.list[i].main.temp + '&deg;F',
+                    wind: 'Wind: ' + json.list[i].wind.speed + ' MPH',
+                    humidity: 'Humidity: ' + json.list[i].main.humidity + '%'
+                   };
+    }
+
+    // the last entry is 21 hours (kind of a kludge, fix this eventually)
+    weather[5] = {datetime: dayjs(json.list[numElements-1].dt_txt).add(json.city.timezone,'s').format('YYYY-MM-DD HH:MM'),
+                  icon: json.list[numElements-1].weather[0].icon,
+                  temp: 'Temp: ' + json.list[numElements-1].main.temp + '&deg;F',
+                  wind: 'Wind: ' + json.list[numElements-1].wind.speed + ' MPH',
+                  humidity: 'Humidity: ' + json.list[numElements-1].main.humidity + '%'
+                 };
+
+    // put the first entry in "#results-now"
+    // ideally this should be part of the FOR loop at some point
+    $('#results-now').append('<h2></h2>');
+    $('#results-now h2').text(city + ' (' + dayjs(weather[0].datetime).format('M/D/YYYY') + ')');
+    $('#results-now').append(getIconImage(weather[0].icon));
+    $('#results-now').append('<ul></ul>');
+    $('#results-now ul').append('<li>' + weather[0].temp + '</li>');
+    $('#results-now ul').append('<li>' + weather[0].wind + '</li>');
+    $('#results-now ul').append('<li>' + weather[0].humidity + '</li>');
+
+    // put the next five entries in "#results-five-day", one div per output
+    for (let i = 1; i < weather.length; i++) {
+      $('#results-five-day').append('<div></div>');
+      $('#results-five-day div').last().addClass('day-card');
+      $('#results-five-day div').last().append('<h3>' + dayjs(weather[i].datetime).format('M/D/YYYY') + '</h3>');
+      $('#results-five-day div').last().append('<ul></ul>');
+      $('#results-five-day ul').last().append(getIconImage(weather[i].icon));
+      $('#results-five-day ul').last().append('<li>' + weather[i].temp + '</li>');
+      $('#results-five-day ul').last().append('<li>' + weather[i].wind + '</li>');
+      $('#results-five-day ul').last().append('<li>' + weather[i].humidity + '</li>');
+    }
+
+    console.log(weather);
+    console.log(json);
+  }
 
   // function to save and update search history
   const updateHistory = (city, coordinates) => {
@@ -45,6 +106,6 @@ $(document).ready(function() {
   };
 
   // for testing, eventually get the city from the value of the text input
-  getWeather('New York City');
+  getWeather(city);
 
 }); // end ready
