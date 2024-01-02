@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let city = '';  // needed bc Open Weather JSON only has coordinates
   let cityInputEl = document.querySelector('#city');   // input text
 
+  /*
+   * Function to initialize the display with previous functions.
+   * An array of city names is retrieved from local storage and
+   * the corresponding buttons are created
+   */
   const initDisplay = () => {
     // retrieve array of previous search cities from local storage
     let pastCities = JSON.parse(localStorage.getItem("pastCities"))
@@ -22,6 +27,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /*
+   * The counterpart to initDisplay(): this function saves past
+   * searches to local storage. It does that by querying the current
+   * buttons that represent those past searches.
+   */
   const saveSearchCities = () => {
     let pastCities = [];
 
@@ -34,7 +44,15 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem("pastCities", JSON.stringify(pastCities));
   }
 
-  // function accepts input and changes DOM with weather forecast
+  /////////////////////////////////////////////////////////////////////////////
+  //                             Fetch Functions                             //
+  /////////////////////////////////////////////////////////////////////////////
+  /*
+   * The getWeather() function does most of the heavy lifting for this web page:
+   * it performs two fetches (one to get city coordinates, one to get weather forecast)
+   * and updates the web page accordingly. The only input is a string representing
+   * the city name.
+   */
   const getWeather = city => {
     let url = 'http://api.openweathermap.org/geo/1.0/direct?q=' + city + '&limit=1&appid=' + APIkey;
 
@@ -52,24 +70,33 @@ document.addEventListener('DOMContentLoaded', () => {
         return fetch(weatherURL);
       })
       .then(response => response.json())
-
     // TODO: throw an error with a helpful message if there is no response
+
+    // below is the named callback function that changes the DOM
       .then(json => updateDisplay(json))
 
     // TODO: need to alert the user if there is an error and which fetch caused it
       .catch(e => console.log(e.message))
   }; // end getWeather()
 
-  // return image element pointing to the appropriate icon
+  /*
+   * Simple convenience function that returns an image element that
+   * points to the weather icon that is its only argument.
+   */
   const getIconImage = (icon) => {
     let imgEl = document.createElement('img');
     imgEl.src = 'https://openweathermap.org/img/wn/' + icon + '.png';
     return imgEl;
   }
 
-  // function to update the display with the 5-day forecast
-  // input is a json object from the Open Weather API fetch
-  // remember that fetches are asynchronous, so this function has to be part of a .then chain
+  /////////////////////////////////////////////////////////////////////////////
+  //                              Display Update                              //
+  /////////////////////////////////////////////////////////////////////////////
+  /*
+   * This function is called from getWeather() as its last function. The argument
+   * passed to the function is the json retrieved from the weather fetch. Once
+   * the data is parsed, it is used to update the appropriate DOM elements.
+   */
   const updateDisplay = json => {
     let numElements = json.list.length, weather = [], dateTime;
 
@@ -84,6 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // the last entry is 21 hours (kind of a kludge, fix this eventually)
+    // TODO: be more intelligent about getting the element from within a given date
     weather[5] = {datetime: dayjs(json.list[numElements-1].dt_txt).add(json.city.timezone,'s').format('YYYY-MM-DD HH:MM'),
                   icon: json.list[numElements-1].weather[0].icon,
                   temp: 'Temp: ' + json.list[numElements-1].main.temp + '&deg;F',
@@ -99,6 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
       cardEl[i].innerHTML = '';
     }
 
+    // FOR loop to update the weather divs
     for (let i = 0; i < cardEl.length; i++) {
       // Header differs for today vs next 5 days
       if (i===0) {
@@ -119,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
       listEl.textContent = weather[i].humidity;
     }
 
+    // save this search
     let pastCitiesEl = document.querySelectorAll("#search-history button");
     let previousSearchCity = false;
     for (let i = 0; i < pastCitiesEl.length; i++) {
@@ -126,19 +156,23 @@ document.addEventListener('DOMContentLoaded', () => {
         previousSearchCity = true;
       }
     }
-
     if (!previousSearchCity) {
       updateHistory(city);
     }
 
     // clear the text input for city and re-focus on text input for next search
+    // allows the user to type a number of cities in succession, hitting Enter between each
     city = '';
     cityInputEl.value = city;
     cityInputEl.focus();
 
   } // end updateDisplay()
 
-  // function to save and update search history
+  /*
+   * Function updates search history, adding a button if one doesn't already
+   * exist with the most recent city name. It calls saveSearchCities() at the
+   * end of the function to save the updates list of cities to local storage.
+   */
   const updateHistory = latestCity => {
     // use current buttons (or local storage?) to initialize an array of objects with previous searches
     let pastCities = JSON.parse(localStorage.getItem("pastCities"));
@@ -160,8 +194,9 @@ document.addEventListener('DOMContentLoaded', () => {
     saveSearchCities();
   };
 
-  // set an event listener on the search history buttons
-  // It will have to be on the enclosing div, then use the evt to get the target
+  /*
+   * Event listener "click" for the previous search buttons
+   */
   document.querySelector('#search-history').addEventListener("click", evt => {
     let btnEl = evt.target;
     city = btnEl.textContent;
@@ -178,7 +213,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   };
 
-  // function to start search by click or hitting Enter
+  /*
+   * Named callback function to start the fetch for the input city.
+   * If the input is blank, an alert is displayed.
+   */
   const startSearch = () => {
     city = cityInputEl.value;
     if (city==='') {
@@ -188,11 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
     getWeather(city);
   }
 
-  // Event listener to get the city
   /*
-   * When user clicks on search (or hits enter in the text input), display the weather for the city
-   * Will need to do some error checking: that the city is valid, that the input isn't empty
-   * If a state is entered, should I return an error or ignore it or use the info?
+   * When user clicks on search or hits enter in the text input, display the weather for the city
    */
   document.querySelector('#search').addEventListener("click", startSearch);
   cityInputEl.addEventListener("keypress", e => {
