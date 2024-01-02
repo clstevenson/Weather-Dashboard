@@ -4,9 +4,35 @@ document.addEventListener('DOMContentLoaded', () => {
   // Open Weather API key
   const APIkey = 'ee399b08217b77b68c46f7e79d42d432';
 
-  // Most recent city searched
-  let city = '';
-  let cityInputEl = document.querySelector('#city');
+  // variables related to cities
+  let city = '';  // needed bc Open Weather JSON only has coordinates
+  let cityInputEl = document.querySelector('#city');   // input text
+
+  const initDisplay = () => {
+    // retrieve array of previous search cities from local storage
+    let pastCities = JSON.parse(localStorage.getItem("pastCities"))
+
+    // assuming there are some, set up the buttons
+    if (pastCities !== null) {
+      for (let i = 0; i < pastCities.length; i++) {
+        let btnEl = document.createElement("button");
+        btnEl.textContent = pastCities[i];
+        document.querySelector("#search-history").append(btnEl);
+      }
+    }
+  }
+
+  const saveSearchCities = () => {
+    let pastCities = [];
+
+    // populate array from buttons
+    let pastCitiesEl = document.querySelectorAll("#search-history button");
+    for (let i = 0; i < pastCitiesEl.length; i++) {
+      pastCities[i] = pastCitiesEl[i].textContent;
+    }
+
+    localStorage.setItem("pastCities", JSON.stringify(pastCities));
+  }
 
   // function accepts input and changes DOM with weather forecast
   const getWeather = city => {
@@ -69,7 +95,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // need to clear previous search history, if any
     document.querySelector('#results-now h2').textContent = "";
     let cardEl = document.querySelectorAll('div.weather-card');
-    console.log(cardEl);
     for (let i=0; i<cardEl.length; i++) {
       cardEl[i].innerHTML = '';
     }
@@ -94,34 +119,54 @@ document.addEventListener('DOMContentLoaded', () => {
       listEl.textContent = weather[i].humidity;
     }
 
+    let pastCitiesEl = document.querySelectorAll("#search-history button");
+    let previousSearchCity = false;
+    for (let i = 0; i < pastCitiesEl.length; i++) {
+      if (pastCitiesEl[i].textContent == city) {
+        previousSearchCity = true;
+      }
+    }
+
+    if (!previousSearchCity) {
+      updateHistory(city);
+    }
+
     // clear the text input for city and re-focus on text input for next search
     city = '';
     cityInputEl.value = city;
     cityInputEl.focus();
 
-    // diagnostics
-    console.log(weather);
-    console.log(json);
   } // end updateDisplay()
 
   // function to save and update search history
-  const updateHistory = (city, coordinates) => {
+  const updateHistory = latestCity => {
     // use current buttons (or local storage?) to initialize an array of objects with previous searches
-
+    let pastCities = JSON.parse(localStorage.getItem("pastCities"));
 
     // update the seach history array with the recent search
-
+    if (pastCities !== null) {
+      pastCities.push(latestCity);
+    } else {
+      pastCities = [];
+      pastCities[0] = latestCity;
+    }
 
     // display a button with the name of the city. Also store the coordinates as a data attribute.
-
-
-    // set an event listener on the button that was created. When clicked, a new weather search is run
-
+    let btnEl = document.createElement("button");
+    btnEl.textContent = latestCity;
+    document.querySelector('#search-history').appendChild(btnEl);
 
     // update local storage with the updated object array
-
+    saveSearchCities();
   };
 
+  // set an event listener on the search history buttons
+  // It will have to be on the enclosing div, then use the evt to get the target
+  document.querySelector('#search-history').addEventListener("click", evt => {
+    let btnEl = evt.target;
+    city = btnEl.textContent;
+    getWeather(city);
+  })
 
   /*
    * Function to clear previous searches.
@@ -133,11 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   };
 
-  // for testing, eventually get the city from the value of the text input
-
-  // Event listener to get the city
-  cityInputEl.focus();
-
   // function to start search by click or hitting Enter
   const startSearch = () => {
     city = cityInputEl.value;
@@ -148,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
     getWeather(city);
   }
 
+  // Event listener to get the city
   /*
    * When user clicks on search (or hits enter in the text input), display the weather for the city
    * Will need to do some error checking: that the city is valid, that the input isn't empty
@@ -155,9 +196,14 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   document.querySelector('#search').addEventListener("click", startSearch);
   cityInputEl.addEventListener("keypress", e => {
-    if (e.keyCode == 13) {
+    if (e.key == "Enter") {
       startSearch();
     }
   });
+
+  // populate previous search buttons
+  initDisplay();
+  // set focus on text input
+  cityInputEl.focus();
 
 }, false);  // end DOM ready
