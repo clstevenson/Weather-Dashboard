@@ -4,8 +4,8 @@ $(document).ready(function() {
   // Open Weather API key
   const APIkey = 'ee399b08217b77b68c46f7e79d42d432';
 
-  // eventually get this from the text input of the form
-  let city = "Richmond";
+  // Most recent city searched
+  let city = '';
 
   // function accepts input and changes DOM with weather forecast
   const getWeather = city => {
@@ -13,6 +13,8 @@ $(document).ready(function() {
 
     fetch(url)
       .then(response => response.json())
+
+    // TODO: throw an error with a helpful message if there is no response
       .then(json => {
         // get the coordinates from the first city
         return {lat: json[0].lat, lon: json[0].lon};
@@ -23,9 +25,13 @@ $(document).ready(function() {
         return fetch(weatherURL);
       })
       .then(response => response.json())
+
+    // TODO: throw an error with a helpful message if there is no response
       .then(json => updateDisplay(json))
+
+    // TODO: need to alert the user if there is an error and which fetch caused it
       .catch(e => console.log(e.message))
-  };
+  }; // end getWeather()
 
   // return an jQuery image object with the desired icon
   const getIconImage = (icon) => $("<img></img>").attr('src','https://openweathermap.org/img/wn/' + icon + '.png');
@@ -54,11 +60,16 @@ $(document).ready(function() {
                   humidity: 'Humidity: ' + json.list[numElements-1].main.humidity + '%'
                  };
 
-    // put the first entry in "#results-now"
-    // ideally this should be part of the FOR loop at some point
-    $('#results-now').append('<h2></h2>');
+    // need to clear previous search history, if any
+    $('#results-now').empty().append('<h2></h2>');
+    $('#results-five-day').empty().append('<h2>5-day Forecast</h2>');
+
+    // set up the headings
     $('#results-now h2').text(city + ' (' + dayjs(weather[0].datetime).format('M/D/YYYY') + ')');
     $('#results-now').append(getIconImage(weather[0].icon));
+
+    // put the first entry in "#results-now"
+    // ideally this should be part of the FOR loop at some point
     $('#results-now').append('<ul></ul>');
     $('#results-now ul').append('<li>' + weather[0].temp + '</li>');
     $('#results-now ul').append('<li>' + weather[0].wind + '</li>');
@@ -75,10 +86,14 @@ $(document).ready(function() {
       $('#results-five-day ul').last().append('<li>' + weather[i].wind + '</li>');
       $('#results-five-day ul').last().append('<li>' + weather[i].humidity + '</li>');
     }
+    // clear the text input for city and re-focus on text input for next search
+    city = '';
+    $('#city').val(city).focus();
 
+    // diagnostics
     console.log(weather);
     console.log(json);
-  }
+  } // end updateDisplay()
 
   // function to save and update search history
   const updateHistory = (city, coordinates) => {
@@ -106,6 +121,29 @@ $(document).ready(function() {
   };
 
   // for testing, eventually get the city from the value of the text input
-  getWeather(city);
+
+  // Event listener to get the city
+  $('#city').focus();
+
+  // function to start search by click or hitting Enter
+  const startSearch = () => {
+    city = $("#city").val();
+    if (city==='') {
+      window.alert('You must enter a value for the city!');
+      return;
+    }
+    getWeather(city);
+  }
+
+  $('#search').click(startSearch);
+  $('#city').keypress( e => {
+    if (e.keyCode == 13) {
+      startSearch();
+    }
+  });
+
+  // when user clicks on search (or hits enter in the text input?), display the weather for the city
+  // Will need to do some error checking: that the city is valid, that the input isn't empty
+  // If a state is entered, should I return an error or ignore it or use the info?
 
 }); // end ready
