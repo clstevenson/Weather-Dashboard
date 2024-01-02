@@ -1,11 +1,12 @@
 "use strict";
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', () => {
   // Open Weather API key
   const APIkey = 'ee399b08217b77b68c46f7e79d42d432';
 
   // Most recent city searched
   let city = '';
+  let cityInputEl = document.querySelector('#city');
 
   // function accepts input and changes DOM with weather forecast
   const getWeather = city => {
@@ -33,8 +34,12 @@ $(document).ready(function() {
       .catch(e => console.log(e.message))
   }; // end getWeather()
 
-  // return an jQuery image object with the desired icon
-  const getIconImage = (icon) => $("<img></img>").attr('src','https://openweathermap.org/img/wn/' + icon + '.png');
+  // return image element pointing to the appropriate icon
+  const getIconImage = (icon) => {
+    let imgEl = document.createElement('img');
+    imgEl.src = 'https://openweathermap.org/img/wn/' + icon + '.png';
+    return imgEl;
+  }
 
   // function to update the display with the 5-day forecast
   // input is a json object from the Open Weather API fetch
@@ -60,35 +65,39 @@ $(document).ready(function() {
                   humidity: 'Humidity: ' + json.list[numElements-1].main.humidity + '%'
                  };
 
+
     // need to clear previous search history, if any
-    $('#results-now').empty().append('<h2></h2>');
-    $('#results-five-day').empty().append('<h2>5-day Forecast</h2>');
-
-    // set up the headings
-    $('#results-now h2').text(city + ' (' + dayjs(weather[0].datetime).format('M/D/YYYY') + ')');
-    $('#results-now').append(getIconImage(weather[0].icon));
-
-    // put the first entry in "#results-now"
-    // ideally this should be part of the FOR loop at some point
-    $('#results-now').append('<ul></ul>');
-    $('#results-now ul').append('<li>' + weather[0].temp + '</li>');
-    $('#results-now ul').append('<li>' + weather[0].wind + '</li>');
-    $('#results-now ul').append('<li>' + weather[0].humidity + '</li>');
-
-    // put the next five entries in "#results-five-day", one div per output
-    for (let i = 1; i < weather.length; i++) {
-      $('#results-five-day').append('<div></div>');
-      $('#results-five-day div').last().addClass('day-card');
-      $('#results-five-day div').last().append('<h3>' + dayjs(weather[i].datetime).format('M/D/YYYY') + '</h3>');
-      $('#results-five-day div').last().append('<ul></ul>');
-      $('#results-five-day ul').last().append(getIconImage(weather[i].icon));
-      $('#results-five-day ul').last().append('<li>' + weather[i].temp + '</li>');
-      $('#results-five-day ul').last().append('<li>' + weather[i].wind + '</li>');
-      $('#results-five-day ul').last().append('<li>' + weather[i].humidity + '</li>');
+    document.querySelector('#results-now h2').textContent = "";
+    let cardEl = document.querySelectorAll('div.weather-card');
+    console.log(cardEl);
+    for (let i=0; i<cardEl.length; i++) {
+      cardEl[i].innerHTML = '';
     }
+
+    for (let i = 0; i < cardEl.length; i++) {
+      // Header differs for today vs next 5 days
+      if (i===0) {
+        // header for today: larger and includes icon
+        document.querySelector('#results-now h2').textContent = city + ' (' + dayjs(weather[0].datetime).format('M/D/YYYY') + ')';
+        document.querySelector('#results-now h2').appendChild(getIconImage(weather[0].icon));
+      } else  {
+        // only for the 5-day forecast
+        cardEl[i].innerHTML = '<h3>' + dayjs(weather[i].datetime).format('M/D/YYYY') + '</h3>';
+        cardEl[i].appendChild(getIconImage(weather[i].icon));
+      }
+      let ul = cardEl[i].appendChild(document.createElement("ul"));
+      let listEl = ul.appendChild(document.createElement("li"));
+      listEl.innerHTML = weather[i].temp;
+      listEl = ul.appendChild(document.createElement("li"));
+      listEl.textContent = weather[i].wind;
+      listEl = ul.appendChild(document.createElement("li"));
+      listEl.textContent = weather[i].humidity;
+    }
+
     // clear the text input for city and re-focus on text input for next search
     city = '';
-    $('#city').val(city).focus();
+    cityInputEl.value = city;
+    cityInputEl.focus();
 
     // diagnostics
     console.log(weather);
@@ -114,8 +123,12 @@ $(document).ready(function() {
   };
 
 
-  // function to clear previous searches
-  // I feel that this is necessary otherwise they will just accumulate!
+  /*
+   * Function to clear previous searches.
+   * I feel that this is necessary otherwise they will just accumulate!
+   * This could be tied to another button or maybe double-clicking an existing
+   * search will remove just that one.
+   */
   const clearHistory = () => {
 
   };
@@ -123,11 +136,11 @@ $(document).ready(function() {
   // for testing, eventually get the city from the value of the text input
 
   // Event listener to get the city
-  $('#city').focus();
+  cityInputEl.focus();
 
   // function to start search by click or hitting Enter
   const startSearch = () => {
-    city = $("#city").val();
+    city = cityInputEl.value;
     if (city==='') {
       window.alert('You must enter a value for the city!');
       return;
@@ -135,15 +148,16 @@ $(document).ready(function() {
     getWeather(city);
   }
 
-  $('#search').click(startSearch);
-  $('#city').keypress( e => {
+  /*
+   * When user clicks on search (or hits enter in the text input), display the weather for the city
+   * Will need to do some error checking: that the city is valid, that the input isn't empty
+   * If a state is entered, should I return an error or ignore it or use the info?
+   */
+  document.querySelector('#search').addEventListener("click", startSearch);
+  cityInputEl.addEventListener("keypress", e => {
     if (e.keyCode == 13) {
       startSearch();
     }
   });
 
-  // when user clicks on search (or hits enter in the text input?), display the weather for the city
-  // Will need to do some error checking: that the city is valid, that the input isn't empty
-  // If a state is entered, should I return an error or ignore it or use the info?
-
-}); // end ready
+}, false);  // end DOM ready
