@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnEl.textContent = pastCities[i];
         document.querySelector("#search-history").append(btnEl);
       }
+      // display the search from the first button
+      city = pastCities[0];
+      getWeather(city);
     }
   }
 
