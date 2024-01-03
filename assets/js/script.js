@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
    * the city name.
    */
   const getWeather = city => {
-    let url = 'http://api.openweathermap.org/geo/1.0/direct?q=' + city + '&limit=1&appid=' + APIkey;
+    let url = 'https://api.openweathermap.org/geo/1.0/direct?q=' + city + '&limit=1&appid=' + APIkey;
 
     fetch(url)
       .then(response => response.json())
