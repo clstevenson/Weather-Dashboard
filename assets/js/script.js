@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
    */
   const initDisplay = () => {
     // retrieve array of previous search cities from local storage
-    let pastCities = JSON.parse(localStorage.getItem("pastCities"))
+    let pastCities = JSON.parse(localStorage.getItem("pastCities"));
 
     // assuming there are some, set up the buttons
     if (pastCities !== null) {
@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // populate array from buttons
     let pastCitiesEl = document.querySelectorAll("#search-history button");
+
     for (let i = 0; i < pastCitiesEl.length; i++) {
       pastCities[i] = pastCitiesEl[i].textContent;
     }
