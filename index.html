@@ -9,47 +9,56 @@
 
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
         <!-- Place favicon.ico in the root directory -->
+        <link rel="stylesheet" href="./assets/styles/styles.css" type="text/css" media="screen" />
 
     </head>
     <body>
-        <title>Weather Dashboard</title>
+        <main>
+            <title>Weather Dashboard</title>
+
+            <header>
+                <h1>Weather Dashboard</h1>
+            </header>
 
 
-        <h1>Weather Dashboard</h1>
+            <div id="container">
+                <section id="sidebar">
+                    <div id="search-form">
+                        <h2>Search for a City:</h2>
+                        <input id="city" type="text" placeholder="Enter City" />
+                        <button id="search">Search</button>
+                    </div>
 
-        <!-- user enters the city to search for -->
-        <div>
-            <h2>Search for a City:</h2>
-            <input id="city" type="text" placeholder="Enter City" />
-            <button id="search">Search</button>
-        </div>
+                    <!-- container for previous searches (as buttons) -->
+                    <div id="search-history">
+                    </div>
+                </section>
 
-        <!-- container for previous searches (as buttons) -->
-        <div id="search-history">
-        </div>
+                <section id="results-area">
+                    <div id="results-now">
+                        <h2>Current Conditions</h2>
+                        <div class="weather-card"></div>
+                    </div>
 
-        <!-- display results of search -->
-        <div id="results-now">
-            <h2>Current Conditions</h2>
-            <div class="weather-card"></div>
-        </div>
+                    <h2>5-Day Forecast</h2>
+                    <div id="results-five-day">
+                        <!-- use one card for each day, starting tomorrow -->
+                        <!-- each card added will have class "weather-card" -->
+                        <div class="weather-card"></div>
+                        <div class="weather-card"></div>
+                        <div class="weather-card"></div>
+                        <div class="weather-card"></div>
+                        <div class="weather-card"></div>
+                    </div>
+                </section>
+            </div>
 
-        <div id="results-five-day">
-            <h2>5-Day Forecast</h2>
-            <!-- use one card for each day, starting tomorrow -->
-            <!-- each card added will have class "weather-card" -->
-            <div class="weather-card"></div>
-            <div class="weather-card"></div>
-            <div class="weather-card"></div>
-            <div class="weather-card"></div>
-            <div class="weather-card"></div>
-        </div>
-
-        <!-- day.js library -->
-        <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.3/dayjs.min.js"
-                integrity="sha256-iu/zLUB+QgISXBLCW/mcDi/rnf4m4uEDO0wauy76x7U="
-                crossorigin="anonymous" ></script>
-        <!-- my script file -->
-        <script type="text/javascript" src="./assets/js/script.js"></script>
+            <!-- day.js library -->
+            <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.3/dayjs.min.js"
+                    integrity="sha256-iu/zLUB+QgISXBLCW/mcDi/rnf4m4uEDO0wauy76x7U="
+                    crossorigin="anonymous" ></script>
+            <!-- my script file -->
+            <script type="text/javascript" src="./assets/js/script.js"></script>
+        </main>
     </body>
 </html>

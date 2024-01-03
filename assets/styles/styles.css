@@ -1,0 +1,98 @@
+
+/*****************************************************************************/
+/*                              General Styling                              */
+/*****************************************************************************/
+* {
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+}
+
+main {
+    width: 90%;
+    margin: auto;
+}
+
+h1 {
+    border: 1px solid darkblue;
+    /* background-color: lightblue; */
+    background-image: linear-gradient(to right, lightblue, darkblue);
+    color: white;
+    font-size: 200%;
+    padding: 3px 5px 3px 50%;
+}
+
+li {
+    list-style: none;
+}
+
+#container {
+    display: flex;
+    flex-direction: row;
+    /* justify-content: space-between; */
+}
+
+#sidebar {
+    width: 25%;
+    margin: 3px;
+    margin-right: 10px;
+}
+
+#results-area {
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+}
+
+#results-now {
+    background-color: white;
+    border: 2px solid darkblue;
+    padding: 2px;
+}
+
+#results-five-day {
+    display: flex;
+    flex-wrap: row;
+    margin: 3px;
+}
+
+#results-five-day div.weather-card {
+    background-color: lightblue;
+    margin: 3px;
+}
+
+h2 {
+    font-size: 160%;
+}
+
+h3 {
+    font-size: 140%;
+}
+
+button {
+    font-size: 115%;
+    padding: 3px;
+    margin: 8px;
+    display: block;
+    width: 95%;
+}
+
+input {
+    border: 1px solid black;
+    width: 90%;
+    font-size: 115%;
+    padding: 3px;
+    margin: 8px;
+    display: block;
+}
+
+#search {
+    background-color: lightsalmon;
+}
+
+#search-history {
+    border-top: solid 3px lightgray;
+    width: 100%;
+}
+
+#search-history button {
+    background-color: lightgray;
+}
